@@ -38,8 +38,8 @@ public class Main extends Application {
 
 					for(char i: event.getMessage().getContent().toCharArray()){
 
-						if(Character.isLetter(i)){
-							newMessage.append(" :regional_indicator_" + i + ": ");
+						if(('a' <= i && i <= 'z') || ('A' <= i && i <= 'Z')){
+							newMessage.append(" :regional_indicator_" + Character.toLowerCase(i) + ": ");
 
 						}else if(i == ' '){
 							newMessage.append(" :black_large_square: ");
@@ -47,7 +47,7 @@ public class Main extends Application {
 
 					}
 
-					event.getTextChannel().sendMessage(newMessage.toString()).complete();
+					event.getChannel().sendMessage(newMessage.toString()).complete();
 					event.getMessage().delete().complete();
 
 				}
