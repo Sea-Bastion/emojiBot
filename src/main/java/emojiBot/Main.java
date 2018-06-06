@@ -10,18 +10,38 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import net.dv8tion.jda.core.AccountType;
+import net.dv8tion.jda.core.events.DisconnectEvent;
+import net.dv8tion.jda.core.events.ReconnectedEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 public class Main extends Application {
 
 	CJDA bot;
+	String Token = getToken();
 
 	public void start(Stage primaryStage){
+		System.out.println(Token);
+
+		Label text = new Label("Bot setting up");
+		text.setScaleX(3);
+		text.setScaleY(3);
+
+		primaryStage.setScene(new Scene(new StackPane(text), 400, 300));
+
+		primaryStage.setOnCloseRequest(e -> {
+			bot.shutdownNow();
+			System.exit(0);
+		});
+
+		primaryStage.show();
 		boolean fail = false;
 
 		try {
-			bot = new CJDABuilder(AccountType.CLIENT).setToken(getToken()).buildBlocking();
+			while(bot == null) {
+				bot = new CJDABuilder(AccountType.CLIENT).setToken(Token).buildBlocking();
+				bot.setAutoReconnect(true);
+			}
 
 		}catch(Exception e){
 			e.printStackTrace();
@@ -52,21 +72,25 @@ public class Main extends Application {
 
 				}
 			}
+
+			@Override
+			public void onDisconnect(DisconnectEvent event) {
+				super.onDisconnect(event);
+				text.setText("Bot disconnected");
+				text.setTextFill(Color.RED);
+			}
+
+			@Override
+			public void onReconnect(ReconnectedEvent event) {
+				super.onReconnect(event);
+				text.setText("Bot reconnected");
+				text.setTextFill(Color.BLACK);
+			}
 		});
 
-		Label text = new Label(fail?"Bot failed":"Bot working");
-		text.setScaleX(3);
-		text.setScaleY(3);
+
+		text.setText(fail?"Bot failed":"Bot working");
 		if(fail) text.setTextFill(Color.RED);
-
-		primaryStage.setScene(new Scene(new StackPane(text), 400, 300));
-
-		primaryStage.setOnCloseRequest(e -> {
-			bot.shutdownNow();
-			System.exit(0);
-		});
-
-		primaryStage.show();
 
 	}
 
